@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Task Tracker</title>
+<style>
+ body {
+  background-color: #121212;
+  color: #e0e0e0;
+  font-family: Arial, sans-serif;
+  margin: 0;
+  padding: 0;
+ }
+ h1 {
+  text-align: center;
+  color: #90caf9;
+ }
+ .container {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 20px;
+ }
+ .task-form input, .task-form textarea {
+  width: 100%;
+  padding: 10px;
+  margin-bottom: 10px;
+  background-color: #1e1e1e;
+  border: 1px solid #333;
+  color: #fff;
+ }
+ .task-form button {
+  padding: 10px 20px;
+  background-color: #1976d2;
+  border: none;
+  color: #fff;
+  cursor: pointer;
+ }
+ .task-list {
+  list-style: none;
+  padding: 0;
+ }
+ .task-list li {
+  background-color: #1e1e1e;
+  padding: 10px;
+  margin-bottom: 10px;
+  border: 1px solid #333;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+ }
+ .task-list li .actions button {
+  margin-left: 5px;
+  background-color: #424242;
+  border: none;
+  color: #fff;
+  padding: 5px 10px;
+  cursor: pointer;
+ }
+ .task-list li .actions button.delete {
+  background-color: #d32f2f;
+ }
+ .task-list li .actions button.save {
+  background-color: #388e3c;
+ }
+</style>
+</head>
+<body>
+<div class="container">
+<h1>Task Tracker</h1>
+<form id="taskForm" class="task-form">
+ <input type="text" id="title" placeholder="Task Title" required>
+ <textarea id="description" placeholder="Task Description" required></textarea>
+ <button type="submit">Add Task</button>
+</form>
+<ul id="taskList" class="task-list"></ul>
+</div>
+<script>
+let tasks = JSON.parse(localStorage.getItem('tasks') || '[]');
+function saveTasks() {
+ localStorage.setItem('tasks', JSON.stringify(tasks));
+}
+function renderTasks() {
+ const list = document.getElementById('taskList');
+ list.innerHTML = '';
+ tasks.forEach((task, index) => {
+  const li = document.createElement('li');
+  const text = document.createElement('div');
+  text.innerHTML = `<strong>${task.title}</strong><p>${task.description}</p>`;
+  const actions = document.createElement('div');
+  actions.className = 'actions';
+  const editBtn = document.createElement('button');
+  editBtn.textContent = 'Edit';
+  editBtn.onclick = () => editTask(index);
+  const delBtn = document.createElement('button');
+  delBtn.textContent = 'Delete';
+  delBtn.className = 'delete';
+  delBtn.onclick = () => deleteTask(index);
+  actions.appendChild(editBtn);
+  actions.appendChild(delBtn);
+  li.appendChild(text);
+  li.appendChild(actions);
+  list.appendChild(li);
+ });
+}
+function addTask(title, description) {
+ tasks.push({title, description});
+ saveTasks();
+ renderTasks();
+}
+function deleteTask(index) {
+ tasks.splice(index, 1);
+ saveTasks();
+ renderTasks();
+}
+function editTask(index) {
+ const task = tasks[index];
+ const li = document.getElementById('taskList').children[index];
+ li.innerHTML = '';
+ const titleInput = document.createElement('input');
+ titleInput.value = task.title;
+ const descInput = document.createElement('textarea');
+ descInput.value = task.description;
+ const saveBtn = document.createElement('button');
+ saveBtn.textContent = 'Save';
+ saveBtn.className = 'save';
+ saveBtn.onclick = () => {
+  task.title = titleInput.value;
+  task.description = descInput.value;
+  saveTasks();
+  renderTasks();
+ };
+ li.appendChild(titleInput);
+ li.appendChild(descInput);
+ li.appendChild(saveBtn);
+}
+renderTasks();
+ document.getElementById('taskForm').addEventListener('submit', (e) => {
+ e.preventDefault();
+ const title = document.getElementById('title').value;
+ const description = document.getElementById('description').value;
+ addTask(title, description);
+ document.getElementById('taskForm').reset();
+ });
+</script>
+</body>
+</html>
